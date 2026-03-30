@@ -12,9 +12,11 @@ const historyToggle = document.getElementById('historyToggle');
 const historyPanel = document.getElementById('historyPanel');
 const historyList = document.getElementById('historyList');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const themeToggle = document.getElementById('themeToggle');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
+const THEME_KEY = 'currencyConverterTheme';
 const MAX_HISTORY = 5;
 
 let exchangeRates = {};
@@ -25,6 +27,7 @@ convertBtn.addEventListener('click', convertCurrency);
 swapBtn.addEventListener('click', swapCurrencies);
 historyToggle.addEventListener('click', toggleHistory);
 clearHistoryBtn.addEventListener('click', clearHistory);
+themeToggle.addEventListener('click', toggleTheme);
 
 amountInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -34,6 +37,21 @@ amountInput.addEventListener('keypress', (e) => {
 
 fromCurrency.addEventListener('change', convertCurrency);
 toCurrency.addEventListener('change', convertCurrency);
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem(THEME_KEY, newTheme);
+    themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+}
+
+function loadTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+}
 
 function loadHistoryFromStorage() {
     const stored = localStorage.getItem(HISTORY_KEY);
@@ -96,7 +114,8 @@ function useHistoryItem(index) {
 }
 
 function toggleHistory() {
-    historyPanel.classList.toggle('hidden');
+    const isHidden = historyPanel.classList.toggle('hidden');
+    historyToggle.textContent = isHidden ? '📋 View Recent History' : '✕ Close History';
 }
 
 function clearHistory() {
@@ -119,7 +138,6 @@ async function convertCurrency() {
 
     if (from === to) {
         showResult(amount, amount, 1, from, to);
-        addToHistory(amount, from, to, amount, 1);
         return;
     }
 
@@ -178,7 +196,7 @@ function swapCurrencies() {
 }
 
 function showResult(originalAmount, convertedAmount, rate, from, to) {
-    resultAmount.textContent = `${convertedAmount.toFixed(2)} ${to}`;
+    resultAmount.textContent = `${convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${to}`;
     exchangeRate.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
     resultDiv.classList.remove('hidden');
 }
@@ -205,6 +223,7 @@ function hideError() {
 }
 
 window.addEventListener('load', () => {
+    loadTheme();
     loadHistoryFromStorage();
     renderHistory();
     if (amountInput.value) {

@@ -9,6 +9,12 @@
 <body>
     <div class="container">
         <div class="converter-card">
+            <div class="theme-switch-wrapper">
+                <button id="themeToggle" class="theme-switch-btn" title="Toggle dark/light mode">
+                    🌙
+                </button>
+            </div>
+            
             <div class="header">
                 <h1>💱 Currency Converter</h1>
                 <p class="subtitle">Real-time exchange rates</p>
@@ -17,14 +23,16 @@
             <div class="converter-body">
                 <div class="input-group">
                     <label for="amount">Amount</label>
-                    <input 
-                        type="number" 
-                        id="amount" 
-                        placeholder="Enter amount" 
-                        value="1"
-                        min="0"
-                        step="0.01"
-                    >
+                    <div class="input-wrapper">
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            placeholder="Enter amount" 
+                            value="1"
+                            min="0"
+                            step="0.01"
+                        >
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -40,6 +48,9 @@
                         <option value="AUD">AUD - Australian Dollar</option>
                         <option value="CAD">CAD - Canadian Dollar</option>
                         <option value="CHF">CHF - Swiss Franc</option>
+                        <option value="AED">AED - UAE Dirham</option>
+                        <option value="SAR">SAR - Saudi Riyal</option>
+                        <option value="PKR">PKR - Pakistani Rupee</option>
                     </select>
                 </div>
 
@@ -62,11 +73,14 @@
                         <option value="AUD">AUD - Australian Dollar</option>
                         <option value="CAD">CAD - Canadian Dollar</option>
                         <option value="CHF">CHF - Swiss Franc</option>
+                        <option value="AED">AED - UAE Dirham</option>
+                        <option value="SAR">SAR - Saudi Riyal</option>
+                        <option value="PKR">PKR - Pakistani Rupee</option>
                     </select>
                 </div>
 
                 <button id="convertBtn" class="convert-btn">
-                    Convert
+                    Convert Now
                 </button>
 
                 <div id="result" class="result hidden">
@@ -83,7 +97,7 @@
 
                 <div class="history-section">
                     <button id="historyToggle" class="history-toggle">
-                        📋 History
+                        📋 View Recent History
                     </button>
                     <div id="historyPanel" class="history-panel hidden">
                         <div class="history-header">
@@ -98,7 +112,8 @@
             </div>
 
             <div class="footer">
-                <p>Powered by Exchange Rate API</p>
+                <p>Designed by Yeasin</p>
+                <p>Data provided by Exchange Rate API</p>
             </div>
         </div>
     </div>
