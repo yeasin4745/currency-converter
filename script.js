@@ -1,4 +1,3 @@
- 
 const amountInput = document.getElementById('amount');
 const fromCurrency = document.getElementById('fromCurrency');
 const toCurrency = document.getElementById('toCurrency');
@@ -9,36 +8,110 @@ const resultAmount = document.getElementById('resultAmount');
 const exchangeRate = document.getElementById('exchangeRate');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
+const historyToggle = document.getElementById('historyToggle');
+const historyPanel = document.getElementById('historyPanel');
+const historyList = document.getElementById('historyList');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-// ========== API Configuration ==========
 const API_URL = 'https://open.er-api.com/v6/latest/';
+const HISTORY_KEY = 'currencyConverterHistory';
+const MAX_HISTORY = 5;
 
- 
 let exchangeRates = {};
 let lastBaseCurrency = '';
+let conversionHistory = [];
 
- 
 convertBtn.addEventListener('click', convertCurrency);
 swapBtn.addEventListener('click', swapCurrencies);
+historyToggle.addEventListener('click', toggleHistory);
+clearHistoryBtn.addEventListener('click', clearHistory);
 
-// Convert on Enter key press
 amountInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         convertCurrency();
     }
 });
 
-// Auto-convert when currency changes
 fromCurrency.addEventListener('change', convertCurrency);
 toCurrency.addEventListener('change', convertCurrency);
- 
- 
+
+function loadHistoryFromStorage() {
+    const stored = localStorage.getItem(HISTORY_KEY);
+    if (stored) {
+        conversionHistory = JSON.parse(stored);
+    }
+}
+
+function saveHistoryToStorage() {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(conversionHistory));
+}
+
+function addToHistory(amount, from, to, result, rate) {
+    const historyItem = {
+        amount,
+        from,
+        to,
+        result: parseFloat(result.toFixed(2)),
+        rate: parseFloat(rate.toFixed(4)),
+        timestamp: new Date().toLocaleTimeString()
+    };
+
+    conversionHistory.unshift(historyItem);
+    if (conversionHistory.length > MAX_HISTORY) {
+        conversionHistory.pop();
+    }
+
+    saveHistoryToStorage();
+    renderHistory();
+}
+
+function renderHistory() {
+    if (conversionHistory.length === 0) {
+        historyList.innerHTML = '<p class="history-empty">No conversions yet</p>';
+        return;
+    }
+
+    historyList.innerHTML = conversionHistory.map((item, index) => `
+        <div class="history-item" data-index="${index}">
+            <div class="history-item-content">
+                <span class="history-conversion">${item.amount} ${item.from} → ${item.result} ${item.to}</span>
+                <span class="history-rate">1 ${item.from} = ${item.rate} ${item.to}</span>
+                <span class="history-time">${item.timestamp}</span>
+            </div>
+            <button class="history-item-btn" title="Use this conversion">↻</button>
+        </div>
+    `).join('');
+
+    document.querySelectorAll('.history-item-btn').forEach((btn, index) => {
+        btn.addEventListener('click', () => useHistoryItem(index));
+    });
+}
+
+function useHistoryItem(index) {
+    const item = conversionHistory[index];
+    amountInput.value = item.amount;
+    fromCurrency.value = item.from;
+    toCurrency.value = item.to;
+    convertCurrency();
+}
+
+function toggleHistory() {
+    historyPanel.classList.toggle('hidden');
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all conversion history?')) {
+        conversionHistory = [];
+        saveHistoryToStorage();
+        renderHistory();
+    }
+}
+
 async function convertCurrency() {
     const amount = parseFloat(amountInput.value);
     const from = fromCurrency.value;
     const to = toCurrency.value;
 
-    // Validation
     if (!amount || amount <= 0) {
         showError('Please enter a valid amount');
         return;
@@ -46,24 +119,22 @@ async function convertCurrency() {
 
     if (from === to) {
         showResult(amount, amount, 1, from, to);
+        addToHistory(amount, from, to, amount, 1);
         return;
     }
 
     try {
-        // Show loading state
         showLoading();
         hideError();
         hideResult();
 
-        // Fetch exchange rates
         const rates = await fetchExchangeRates(from);
         
-        // Calculate conversion
         const rate = rates[to];
         const convertedAmount = amount * rate;
 
-        // Display result
         showResult(amount, convertedAmount, rate, from, to);
+        addToHistory(amount, from, to, convertedAmount, rate);
         hideLoading();
 
     } catch (error) {
@@ -72,9 +143,8 @@ async function convertCurrency() {
         console.error('Conversion error:', error);
     }
 }
- 
+
 async function fetchExchangeRates(baseCurrency) {
-    // Use cached rates if available for same base currency
     if (baseCurrency === lastBaseCurrency && Object.keys(exchangeRates).length > 0) {
         return exchangeRates;
     }
@@ -91,26 +161,22 @@ async function fetchExchangeRates(baseCurrency) {
         throw new Error(data['error-type'] || 'API Error');
     }
 
-    // Cache the rates
     exchangeRates = data.rates;
     lastBaseCurrency = baseCurrency;
     
     return exchangeRates;
 }
 
-// ========== Swap Currencies ==========
 function swapCurrencies() {
     const temp = fromCurrency.value;
     fromCurrency.value = toCurrency.value;
     toCurrency.value = temp;
     
-    // Auto-convert after swap
     if (amountInput.value) {
         convertCurrency();
     }
 }
 
- 
 function showResult(originalAmount, convertedAmount, rate, from, to) {
     resultAmount.textContent = `${convertedAmount.toFixed(2)} ${to}`;
     exchangeRate.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
@@ -137,17 +203,10 @@ function showError(message) {
 function hideError() {
     errorDiv.classList.add('hidden');
 }
- 
-function formatNumber(number) {
-    return new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(number);
-}
 
- 
- 
 window.addEventListener('load', () => {
+    loadHistoryFromStorage();
+    renderHistory();
     if (amountInput.value) {
         convertCurrency();
     }

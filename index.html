@@ -15,7 +15,6 @@
             </div>
 
             <div class="converter-body">
-                <!-- Amount Input -->
                 <div class="input-group">
                     <label for="amount">Amount</label>
                     <input 
@@ -28,7 +27,6 @@
                     >
                 </div>
 
-                <!-- From Currency -->
                 <div class="input-group">
                     <label for="fromCurrency">From</label>
                     <select id="fromCurrency" class="currency-select">
@@ -45,14 +43,12 @@
                     </select>
                 </div>
 
-                <!-- Swap Button -->
                 <div class="swap-container">
                     <button id="swapBtn" class="swap-btn" title="Swap currencies">
                         ⇅
                     </button>
                 </div>
 
-                <!-- To Currency -->
                 <div class="input-group">
                     <label for="toCurrency">To</label>
                     <select id="toCurrency" class="currency-select">
@@ -69,30 +65,40 @@
                     </select>
                 </div>
 
-                <!-- Convert Button -->
                 <button id="convertBtn" class="convert-btn">
                     Convert
                 </button>
 
-                <!-- Result Display -->
                 <div id="result" class="result hidden">
                     <div class="result-amount" id="resultAmount"></div>
                     <div class="exchange-rate" id="exchangeRate"></div>
                 </div>
 
-                <!-- Loading Spinner -->
                 <div id="loading" class="loading hidden">
                     <div class="spinner"></div>
                     <p>Fetching latest rates...</p>
                 </div>
 
-                <!-- Error Message -->
                 <div id="error" class="error hidden"></div>
+
+                <div class="history-section">
+                    <button id="historyToggle" class="history-toggle">
+                        📋 History
+                    </button>
+                    <div id="historyPanel" class="history-panel hidden">
+                        <div class="history-header">
+                            <h3>Recent Conversions</h3>
+                            <button id="clearHistoryBtn" class="clear-history-btn" title="Clear history">✕</button>
+                        </div>
+                        <div id="historyList" class="history-list">
+                            <p class="history-empty">No conversions yet</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="footer">
                 <p>Powered by Exchange Rate API</p>
- 
             </div>
         </div>
     </div>
