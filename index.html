@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency Converter - By Yeasin</title>
+    <title>Currency Converter - Professional Edition</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="converter-card">
             <div class="theme-switch-wrapper">
                 <button id="themeToggle" class="theme-switch-btn" title="Toggle dark/light mode">
-                    🌙
+                    <i class="fas fa-moon"></i>
                 </button>
             </div>
             
             <div class="header">
-                <h1>💱 Currency Converter</h1>
-                <p class="subtitle">Real-time exchange rates</p>
+                <h1><i class="fas fa-coins"></i> Currency Converter</h1>
+                <p class="subtitle">Real-time exchange rates for global markets</p>
             </div>
 
             <div class="converter-body">
                 <div class="input-group">
-                    <label for="amount">Amount</label>
+                    <label for="amount">Amount to Convert</label>
                     <div class="input-wrapper">
+                        <span class="input-icon"><i class="fas fa-wallet"></i></span>
                         <input 
                             type="number" 
                             id="amount" 
-                            placeholder="Enter amount" 
+                            placeholder="0.00" 
                             value="1"
                             min="0"
                             step="0.01"
@@ -35,74 +37,55 @@
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label for="fromCurrency">From</label>
-                    <select id="fromCurrency" class="currency-select">
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="BDT">BDT - Bangladeshi Taka</option>
-                        <option value="INR">INR - Indian Rupee</option>
-                        <option value="JPY">JPY - Japanese Yen</option>
-                        <option value="CNY">CNY - Chinese Yuan</option>
-                        <option value="AUD">AUD - Australian Dollar</option>
-                        <option value="CAD">CAD - Canadian Dollar</option>
-                        <option value="CHF">CHF - Swiss Franc</option>
-                        <option value="AED">AED - UAE Dirham</option>
-                        <option value="SAR">SAR - Saudi Riyal</option>
-                        <option value="PKR">PKR - Pakistani Rupee</option>
-                    </select>
-                </div>
+                <div class="currency-row">
+                    <div class="input-group flex-1">
+                        <label for="fromCurrency">From</label>
+                        <select id="fromCurrency" class="currency-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
 
-                <div class="swap-container">
-                    <button id="swapBtn" class="swap-btn" title="Swap currencies">
-                        ⇅
-                    </button>
-                </div>
+                    <div class="swap-container">
+                        <button id="swapBtn" class="swap-btn" title="Swap currencies">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
 
-                <div class="input-group">
-                    <label for="toCurrency">To</label>
-                    <select id="toCurrency" class="currency-select">
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="BDT" selected>BDT - Bangladeshi Taka</option>
-                        <option value="INR">INR - Indian Rupee</option>
-                        <option value="JPY">JPY - Japanese Yen</option>
-                        <option value="CNY">CNY - Chinese Yuan</option>
-                        <option value="AUD">AUD - Australian Dollar</option>
-                        <option value="CAD">CAD - Canadian Dollar</option>
-                        <option value="CHF">CHF - Swiss Franc</option>
-                        <option value="AED">AED - UAE Dirham</option>
-                        <option value="SAR">SAR - Saudi Riyal</option>
-                        <option value="PKR">PKR - Pakistani Rupee</option>
-                    </select>
+                    <div class="input-group flex-1">
+                        <label for="toCurrency">To</label>
+                        <select id="toCurrency" class="currency-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
                 </div>
 
                 <button id="convertBtn" class="convert-btn">
-                    Convert Now
+                    <i class="fas fa-sync-alt"></i> Convert Now
                 </button>
 
                 <div id="result" class="result hidden">
+                    <div class="result-header">Converted Amount</div>
                     <div class="result-amount" id="resultAmount"></div>
                     <div class="exchange-rate" id="exchangeRate"></div>
                 </div>
 
                 <div id="loading" class="loading hidden">
                     <div class="spinner"></div>
-                    <p>Fetching latest rates...</p>
+                    <p>Fetching latest market rates...</p>
                 </div>
 
                 <div id="error" class="error hidden"></div>
 
                 <div class="history-section">
                     <button id="historyToggle" class="history-toggle">
-                        📋 View Recent History
+                        <i class="fas fa-history"></i> Recent Conversions
                     </button>
                     <div id="historyPanel" class="history-panel hidden">
                         <div class="history-header">
-                            <h3>Recent Conversions</h3>
-                            <button id="clearHistoryBtn" class="clear-history-btn" title="Clear history">✕</button>
+                            <h3>History Log</h3>
+                            <button id="clearHistoryBtn" class="clear-history-btn" title="Clear history">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                         <div id="historyList" class="history-list">
                             <p class="history-empty">No conversions yet</p>
@@ -112,8 +95,8 @@
             </div>
 
             <div class="footer">
-                <p>Designed by Yeasin</p>
-                <p>Data provided by Exchange Rate API</p>
+                <p>Built with precision by Yeasin</p>
+                <p>Market data powered by Open Exchange Rates API</p>
             </div>
         </div>
     </div>

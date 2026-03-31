@@ -23,6 +23,14 @@ let exchangeRates = {};
 let lastBaseCurrency = '';
 let conversionHistory = [];
 
+const CURRENCY_NAMES = {
+    "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound", "BDT": "Bangladeshi Taka",
+    "INR": "Indian Rupee", "JPY": "Japanese Yen", "CNY": "Chinese Yuan", "AUD": "Australian Dollar",
+    "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "AED": "UAE Dirham", "SAR": "Saudi Riyal",
+    "PKR": "Pakistani Rupee", "TRY": "Turkish Lira", "BRL": "Brazilian Real", "RUB": "Russian Ruble",
+    "KRW": "South Korean Won", "SGD": "Singapore Dollar", "NZD": "New Zealand Dollar", "MYR": "Malaysian Ringgit"
+};
+
 convertBtn.addEventListener('click', convertCurrency);
 swapBtn.addEventListener('click', swapCurrencies);
 historyToggle.addEventListener('click', toggleHistory);
@@ -30,9 +38,7 @@ clearHistoryBtn.addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
 
 amountInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        convertCurrency();
-    }
+    if (e.key === 'Enter') convertCurrency();
 });
 
 fromCurrency.addEventListener('change', convertCurrency);
@@ -41,23 +47,20 @@ toCurrency.addEventListener('change', convertCurrency);
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem(THEME_KEY, newTheme);
-    themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 
 function loadTheme() {
     const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 
 function loadHistoryFromStorage() {
     const stored = localStorage.getItem(HISTORY_KEY);
-    if (stored) {
-        conversionHistory = JSON.parse(stored);
-    }
+    if (stored) conversionHistory = JSON.parse(stored);
 }
 
 function saveHistoryToStorage() {
@@ -66,19 +69,13 @@ function saveHistoryToStorage() {
 
 function addToHistory(amount, from, to, result, rate) {
     const historyItem = {
-        amount,
-        from,
-        to,
+        amount, from, to,
         result: parseFloat(result.toFixed(2)),
         rate: parseFloat(rate.toFixed(4)),
         timestamp: new Date().toLocaleTimeString()
     };
-
     conversionHistory.unshift(historyItem);
-    if (conversionHistory.length > MAX_HISTORY) {
-        conversionHistory.pop();
-    }
-
+    if (conversionHistory.length > MAX_HISTORY) conversionHistory.pop();
     saveHistoryToStorage();
     renderHistory();
 }
@@ -88,41 +85,55 @@ function renderHistory() {
         historyList.innerHTML = '<p class="history-empty">No conversions yet</p>';
         return;
     }
-
     historyList.innerHTML = conversionHistory.map((item, index) => `
-        <div class="history-item" data-index="${index}">
+        <div class="history-item">
             <div class="history-item-content">
                 <span class="history-conversion">${item.amount} ${item.from} → ${item.result} ${item.to}</span>
                 <span class="history-rate">1 ${item.from} = ${item.rate} ${item.to}</span>
                 <span class="history-time">${item.timestamp}</span>
             </div>
-            <button class="history-item-btn" title="Use this conversion">↻</button>
+            <button class="history-item-btn" onclick="useHistoryItem(${index})" title="Use this conversion">
+                <i class="fas fa-redo-alt"></i>
+            </button>
         </div>
     `).join('');
-
-    document.querySelectorAll('.history-item-btn').forEach((btn, index) => {
-        btn.addEventListener('click', () => useHistoryItem(index));
-    });
 }
 
-function useHistoryItem(index) {
+window.useHistoryItem = function(index) {
     const item = conversionHistory[index];
     amountInput.value = item.amount;
     fromCurrency.value = item.from;
     toCurrency.value = item.to;
     convertCurrency();
-}
+};
 
 function toggleHistory() {
     const isHidden = historyPanel.classList.toggle('hidden');
-    historyToggle.textContent = isHidden ? '📋 View Recent History' : '✕ Close History';
+    historyToggle.innerHTML = isHidden ? '<i class="fas fa-history"></i> Recent Conversions' : '<i class="fas fa-times"></i> Close History';
 }
 
 function clearHistory() {
-    if (confirm('Are you sure you want to clear all conversion history?')) {
+    if (confirm('Clear all conversion history?')) {
         conversionHistory = [];
         saveHistoryToStorage();
         renderHistory();
+    }
+}
+
+async function populateCurrencies() {
+    try {
+        const response = await fetch(`${API_URL}USD`);
+        const data = await response.json();
+        const currencies = Object.keys(data.rates);
+        
+        const createOptions = (selected) => currencies.map(curr => 
+            `<option value="${curr}" ${curr === selected ? 'selected' : ''}>${curr} - ${CURRENCY_NAMES[curr] || 'Currency'}</option>`
+        ).join('');
+
+        fromCurrency.innerHTML = createOptions('USD');
+        toCurrency.innerHTML = createOptions('BDT');
+    } catch (error) {
+        showError('Failed to load currency list.');
     }
 }
 
@@ -131,13 +142,8 @@ async function convertCurrency() {
     const from = fromCurrency.value;
     const to = toCurrency.value;
 
-    if (!amount || amount <= 0) {
+    if (isNaN(amount) || amount <= 0) {
         showError('Please enter a valid amount');
-        return;
-    }
-
-    if (from === to) {
-        showResult(amount, amount, 1, from, to);
         return;
     }
 
@@ -147,41 +153,25 @@ async function convertCurrency() {
         hideResult();
 
         const rates = await fetchExchangeRates(from);
-        
         const rate = rates[to];
         const convertedAmount = amount * rate;
 
         showResult(amount, convertedAmount, rate, from, to);
         addToHistory(amount, from, to, convertedAmount, rate);
         hideLoading();
-
     } catch (error) {
         hideLoading();
-        showError('Failed to fetch exchange rates. Please try again.');
-        console.error('Conversion error:', error);
+        showError('Failed to fetch exchange rates.');
     }
 }
 
 async function fetchExchangeRates(baseCurrency) {
-    if (baseCurrency === lastBaseCurrency && Object.keys(exchangeRates).length > 0) {
-        return exchangeRates;
-    }
-
+    if (baseCurrency === lastBaseCurrency && Object.keys(exchangeRates).length > 0) return exchangeRates;
     const response = await fetch(`${API_URL}${baseCurrency}`);
-    
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
+    if (!response.ok) throw new Error();
     const data = await response.json();
-    
-    if (data.result === 'error') {
-        throw new Error(data['error-type'] || 'API Error');
-    }
-
     exchangeRates = data.rates;
     lastBaseCurrency = baseCurrency;
-    
     return exchangeRates;
 }
 
@@ -189,10 +179,7 @@ function swapCurrencies() {
     const temp = fromCurrency.value;
     fromCurrency.value = toCurrency.value;
     toCurrency.value = temp;
-    
-    if (amountInput.value) {
-        convertCurrency();
-    }
+    if (amountInput.value) convertCurrency();
 }
 
 function showResult(originalAmount, convertedAmount, rate, from, to) {
@@ -201,32 +188,19 @@ function showResult(originalAmount, convertedAmount, rate, from, to) {
     resultDiv.classList.remove('hidden');
 }
 
-function hideResult() {
-    resultDiv.classList.add('hidden');
-}
-
-function showLoading() {
-    loadingDiv.classList.remove('hidden');
-}
-
-function hideLoading() {
-    loadingDiv.classList.add('hidden');
-}
-
+function hideResult() { resultDiv.classList.add('hidden'); }
+function showLoading() { loadingDiv.classList.remove('hidden'); }
+function hideLoading() { loadingDiv.classList.add('hidden'); }
 function showError(message) {
     errorDiv.textContent = message;
     errorDiv.classList.remove('hidden');
 }
+function hideError() { errorDiv.classList.add('hidden'); }
 
-function hideError() {
-    errorDiv.classList.add('hidden');
-}
-
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     loadTheme();
     loadHistoryFromStorage();
+    await populateCurrencies();
     renderHistory();
-    if (amountInput.value) {
-        convertCurrency();
-    }
+    if (amountInput.value) convertCurrency();
 });
