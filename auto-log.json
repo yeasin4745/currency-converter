@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-03-31T12:00:00Z",
-  "changeSummary": "Modernized UI with professional color palette, dynamic currency loading from API, and FontAwesome integration for better UX."
+  "lastUpdate": "2026-04-01T12:00:00Z",
+  "changeSummary": "Added \"Favorite Currency Pairs\" feature with local storage persistence and improved UI state management."
 }

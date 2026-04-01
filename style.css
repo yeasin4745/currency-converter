@@ -456,3 +456,82 @@ body {
         padding: 32px 20px;
     }
 }
+
+/* Favorites Section Styles */
+.favorites-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--input-border);
+}
+
+.favorite-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 2px dashed var(--input-border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.favorite-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.favorite-btn.active {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: #ffc107;
+    color: #b48600;
+}
+
+.favorite-btn.active i {
+    color: #ffc107;
+}
+
+.favorites-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.favorite-chip {
+    padding: 8px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.favorite-chip:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.favorite-chip .remove-fav {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 2px;
+    border-radius: 50%;
+}
+
+.favorite-chip .remove-fav:hover {
+    color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+}

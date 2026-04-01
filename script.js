@@ -13,15 +13,19 @@ const historyPanel = document.getElementById('historyPanel');
 const historyList = document.getElementById('historyList');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 const themeToggle = document.getElementById('themeToggle');
+const favoriteBtn = document.getElementById('favoriteBtn');
+const favoritesList = document.getElementById('favoritesList');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
 const THEME_KEY = 'currencyConverterTheme';
+const FAVORITES_KEY = 'currencyConverterFavorites';
 const MAX_HISTORY = 5;
 
 let exchangeRates = {};
 let lastBaseCurrency = '';
 let conversionHistory = [];
+let favoritePairs = [];
 
 const CURRENCY_NAMES = {
     "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound", "BDT": "Bangladeshi Taka",
@@ -36,13 +40,20 @@ swapBtn.addEventListener('click', swapCurrencies);
 historyToggle.addEventListener('click', toggleHistory);
 clearHistoryBtn.addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
+favoriteBtn.addEventListener('click', toggleFavorite);
 
 amountInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') convertCurrency();
 });
 
-fromCurrency.addEventListener('change', convertCurrency);
-toCurrency.addEventListener('change', convertCurrency);
+fromCurrency.addEventListener('change', () => {
+    updateFavoriteBtnState();
+    convertCurrency();
+});
+toCurrency.addEventListener('change', () => {
+    updateFavoriteBtnState();
+    convertCurrency();
+});
 
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -56,6 +67,78 @@ function loadTheme() {
     const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+
+function loadFavorites() {
+    const stored = localStorage.getItem(FAVORITES_KEY);
+    if (stored) favoritePairs = JSON.parse(stored);
+    renderFavorites();
+}
+
+function saveFavorites() {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoritePairs));
+}
+
+function toggleFavorite() {
+    const from = fromCurrency.value;
+    const to = toCurrency.value;
+    const pair = `${from}-${to}`;
+    
+    const index = favoritePairs.indexOf(pair);
+    if (index === -1) {
+        favoritePairs.push(pair);
+    } else {
+        favoritePairs.splice(index, 1);
+    }
+    
+    saveFavorites();
+    renderFavorites();
+    updateFavoriteBtnState();
+}
+
+function renderFavorites() {
+    if (favoritePairs.length === 0) {
+        favoritesList.classList.add('hidden');
+        return;
+    }
+    
+    favoritesList.classList.remove('hidden');
+    favoritesList.innerHTML = favoritePairs.map(pair => {
+        const [from, to] = pair.split('-');
+        return `
+            <div class="favorite-chip" onclick="useFavorite('${pair}')">
+                <span>${from} ⇄ ${to}</span>
+                <i class="fas fa-times remove-fav" onclick="event.stopPropagation(); removeFavorite('${pair}')"></i>
+            </div>
+        `;
+    }).join('');
+}
+
+window.useFavorite = function(pair) {
+    const [from, to] = pair.split('-');
+    fromCurrency.value = from;
+    toCurrency.value = to;
+    updateFavoriteBtnState();
+    convertCurrency();
+};
+
+window.removeFavorite = function(pair) {
+    favoritePairs = favoritePairs.filter(p => p !== pair);
+    saveFavorites();
+    renderFavorites();
+    updateFavoriteBtnState();
+};
+
+function updateFavoriteBtnState() {
+    const from = fromCurrency.value;
+    const to = toCurrency.value;
+    const pair = `${from}-${to}`;
+    const isActive = favoritePairs.includes(pair);
+    
+    favoriteBtn.classList.toggle('active', isActive);
+    favoriteBtn.innerHTML = isActive ? 
+        '<i class="fas fa-star"></i> Favorited' : 
+        '<i class="far fa-star"></i> Save to Favorites';
 }
 
 function loadHistoryFromStorage() {
@@ -179,6 +262,7 @@ function swapCurrencies() {
     const temp = fromCurrency.value;
     fromCurrency.value = toCurrency.value;
     toCurrency.value = temp;
+    updateFavoriteBtnState();
     if (amountInput.value) convertCurrency();
 }
 
@@ -199,8 +283,10 @@ function hideError() { errorDiv.classList.add('hidden'); }
 
 window.addEventListener('load', async () => {
     loadTheme();
+    loadFavorites();
     loadHistoryFromStorage();
     await populateCurrencies();
     renderHistory();
+    updateFavoriteBtnState();
     if (amountInput.value) convertCurrency();
 });
