@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-04-01T12:00:00Z",
-  "changeSummary": "Added \"Favorite Currency Pairs\" feature with local storage persistence and improved UI state management."
+  "lastUpdate": "2026-04-02T10:30:00Z",
+  "changeSummary": "Implemented searchable currency selection for both 'From' and 'To' fields. This allows users to quickly find currencies by code or name. Refactored currency rendering logic for better reactivity."
 }

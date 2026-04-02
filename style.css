@@ -139,8 +139,7 @@ body {
     font-size: 18px;
 }
 
-.input-group input,
-.currency-select {
+.input-group input {
     width: 100%;
     padding: 14px 16px;
     border: 2px solid var(--input-border);
@@ -150,6 +149,45 @@ body {
     transition: all 0.2s ease;
     background: var(--card-bg);
     color: var(--text-primary);
+}
+
+.currency-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--input-border);
+    border-radius: 0 0 12px 12px;
+    border-top: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.select-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.currency-search {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid var(--input-border);
+    border-radius: 12px 12px 0 0;
+    font-size: 14px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.currency-search:focus {
+    outline: none;
+    border-color: var(--input-focus);
+}
+
+.currency-search::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
 }
 
 .input-group input {

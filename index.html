@@ -40,9 +40,12 @@
                 <div class="currency-row">
                     <div class="input-group flex-1">
                         <label for="fromCurrency">From</label>
-                        <select id="fromCurrency" class="currency-select">
-                            <!-- Populated by JS -->
-                        </select>
+                        <div class="select-wrapper">
+                            <input type="text" id="fromSearch" class="currency-search" placeholder="Search currency...">
+                            <select id="fromCurrency" class="currency-select">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
                     </div>
 
                     <div class="swap-container">
@@ -53,9 +56,12 @@
 
                     <div class="input-group flex-1">
                         <label for="toCurrency">To</label>
-                        <select id="toCurrency" class="currency-select">
-                            <!-- Populated by JS -->
-                        </select>
+                        <div class="select-wrapper">
+                            <input type="text" id="toSearch" class="currency-search" placeholder="Search currency...">
+                            <select id="toCurrency" class="currency-select">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
                     </div>
                 </div>
 

@@ -15,6 +15,8 @@ const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 const themeToggle = document.getElementById('themeToggle');
 const favoriteBtn = document.getElementById('favoriteBtn');
 const favoritesList = document.getElementById('favoritesList');
+const fromSearch = document.getElementById('fromSearch');
+const toSearch = document.getElementById('toSearch');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
@@ -41,6 +43,8 @@ historyToggle.addEventListener('click', toggleHistory);
 clearHistoryBtn.addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
 favoriteBtn.addEventListener('click', toggleFavorite);
+fromSearch.addEventListener('input', (e) => filterCurrencies(e.target.value, fromCurrency));
+toSearch.addEventListener('input', (e) => filterCurrencies(e.target.value, toCurrency));
 
 amountInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') convertCurrency();
@@ -203,21 +207,38 @@ function clearHistory() {
     }
 }
 
+let allCurrencies = [];
+
 async function populateCurrencies() {
     try {
         const response = await fetch(`${API_URL}USD`);
         const data = await response.json();
-        const currencies = Object.keys(data.rates);
+        allCurrencies = Object.keys(data.rates);
         
-        const createOptions = (selected) => currencies.map(curr => 
-            `<option value="${curr}" ${curr === selected ? 'selected' : ''}>${curr} - ${CURRENCY_NAMES[curr] || 'Currency'}</option>`
-        ).join('');
-
-        fromCurrency.innerHTML = createOptions('USD');
-        toCurrency.innerHTML = createOptions('BDT');
+        renderOptions(fromCurrency, 'USD');
+        renderOptions(toCurrency, 'BDT');
     } catch (error) {
         showError('Failed to load currency list.');
     }
+}
+
+function renderOptions(selectElement, selectedValue, filter = '') {
+    const currentSelection = selectElement.value || selectedValue;
+    
+    const filtered = allCurrencies.filter(curr => {
+        const name = (CURRENCY_NAMES[curr] || '').toLowerCase();
+        const code = curr.toLowerCase();
+        const search = filter.toLowerCase();
+        return code.includes(search) || name.includes(search) || curr === currentSelection;
+    });
+
+    selectElement.innerHTML = filtered.map(curr => 
+        `<option value="${curr}" ${curr === currentSelection ? 'selected' : ''}>${curr} - ${CURRENCY_NAMES[curr] || 'Currency'}</option>`
+    ).join('');
+}
+
+function filterCurrencies(query, selectElement) {
+    renderOptions(selectElement, selectElement.value, query);
 }
 
 async function convertCurrency() {
@@ -262,6 +283,12 @@ function swapCurrencies() {
     const temp = fromCurrency.value;
     fromCurrency.value = toCurrency.value;
     toCurrency.value = temp;
+    
+    fromSearch.value = '';
+    toSearch.value = '';
+    renderOptions(fromCurrency, fromCurrency.value);
+    renderOptions(toCurrency, toCurrency.value);
+
     updateFavoriteBtnState();
     if (amountInput.value) convertCurrency();
 }
