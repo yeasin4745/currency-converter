@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-04-02T10:30:00Z",
-  "changeSummary": "Implemented searchable currency selection for both 'From' and 'To' fields. This allows users to quickly find currencies by code or name. Refactored currency rendering logic for better reactivity."
+  "lastUpdate": "2026-04-03T10:00:00Z",
+  "changeSummary": "Added 'Amount in Words' feature to provide a clear textual representation of converted values. Improved result UI with better spacing and typography. Refactored result display logic for better readability."
 }

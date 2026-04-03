@@ -6,6 +6,7 @@ const swapBtn = document.getElementById('swapBtn');
 const resultDiv = document.getElementById('result');
 const resultAmount = document.getElementById('resultAmount');
 const exchangeRate = document.getElementById('exchangeRate');
+const amountInWords = document.getElementById('amountInWords');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
 const historyToggle = document.getElementById('historyToggle');
@@ -293,9 +294,63 @@ function swapCurrencies() {
     if (amountInput.value) convertCurrency();
 }
 
+function numberToWords(num) {
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+
+    if (num === 0) return 'Zero';
+
+    function convert(n) {
+        let s = '';
+        if (n >= 100) {
+            s += ones[Math.floor(n / 100)] + ' Hundred ';
+            n %= 100;
+        }
+        if (n >= 20) {
+            s += tens[Math.floor(n / 10)] + ' ';
+            n %= 10;
+        } else if (n >= 10) {
+            s += teens[n - 10] + ' ';
+            return s;
+        }
+        if (n > 0) {
+            s += ones[n] + ' ';
+        }
+        return s;
+    }
+
+    let result = '';
+    if (num >= 1000000000) {
+        result += convert(Math.floor(num / 1000000000)) + 'Billion ';
+        num %= 1000000000;
+    }
+    if (num >= 1000000) {
+        result += convert(Math.floor(num / 1000000)) + 'Million ';
+        num %= 1000000;
+    }
+    if (num >= 1000) {
+        result += convert(Math.floor(num / 1000)) + 'Thousand ';
+        num %= 1000;
+    }
+    result += convert(Math.floor(num));
+
+    return result.trim();
+}
+
 function showResult(originalAmount, convertedAmount, rate, from, to) {
-    resultAmount.textContent = `${convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${to}`;
+    const formattedAmount = convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    resultAmount.textContent = `${formattedAmount} ${to}`;
     exchangeRate.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    
+    const wholePart = Math.floor(convertedAmount);
+    const decimalPart = Math.round((convertedAmount - wholePart) * 100);
+    let words = numberToWords(wholePart);
+    if (decimalPart > 0) {
+        words += ` and ${numberToWords(decimalPart)} Cents`;
+    }
+    amountInWords.textContent = `(${words} ${CURRENCY_NAMES[to] || to})`;
+    
     resultDiv.classList.remove('hidden');
 }
 

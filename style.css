@@ -297,6 +297,16 @@ body {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.amount-in-words {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-secondary);
+    padding-top: 12px;
+    border-top: 1px solid rgba(79, 70, 229, 0.1);
+    line-height: 1.4;
 }
 
 .loading {
