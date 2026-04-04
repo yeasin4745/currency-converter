@@ -18,6 +18,7 @@ const favoriteBtn = document.getElementById('favoriteBtn');
 const favoritesList = document.getElementById('favoritesList');
 const fromSearch = document.getElementById('fromSearch');
 const toSearch = document.getElementById('toSearch');
+const chartSection = document.getElementById('chartSection');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
@@ -29,6 +30,7 @@ let exchangeRates = {};
 let lastBaseCurrency = '';
 let conversionHistory = [];
 let favoritePairs = [];
+let marketChart = null;
 
 const CURRENCY_NAMES = {
     "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound", "BDT": "Bangladeshi Taka",
@@ -66,6 +68,7 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem(THEME_KEY, newTheme);
     themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    if (marketChart) updateChartTheme();
 }
 
 function loadTheme() {
@@ -263,6 +266,7 @@ async function convertCurrency() {
 
         showResult(amount, convertedAmount, rate, from, to);
         addToHistory(amount, from, to, convertedAmount, rate);
+        updateMarketChart(rates, from, to);
         hideLoading();
     } catch (error) {
         hideLoading();
@@ -352,6 +356,76 @@ function showResult(originalAmount, convertedAmount, rate, from, to) {
     amountInWords.textContent = `(${words} ${CURRENCY_NAMES[to] || to})`;
     
     resultDiv.classList.remove('hidden');
+}
+
+function updateMarketChart(rates, base, target) {
+    const majorCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'AUD', 'CAD', 'BDT', 'INR'];
+    const labels = majorCurrencies.filter(c => rates[c] !== undefined);
+    const data = labels.map(c => rates[c]);
+    
+    chartSection.classList.remove('hidden');
+    const ctx = document.getElementById('marketChart').getContext('2d');
+    
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+    
+    if (marketChart) {
+        marketChart.data.labels = labels;
+        marketChart.data.datasets[0].data = data;
+        marketChart.data.datasets[0].label = `1 ${base} to Major Currencies`;
+        marketChart.options.scales.x.ticks.color = textColor;
+        marketChart.options.scales.y.ticks.color = textColor;
+        marketChart.options.scales.x.grid.color = gridColor;
+        marketChart.options.scales.y.grid.color = gridColor;
+        marketChart.update();
+    } else {
+        marketChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `1 ${base} to Major Currencies`,
+                    data: data,
+                    backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                    borderColor: '#4f46e5',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: gridColor },
+                        ticks: { color: textColor, font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: textColor, font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function updateChartTheme() {
+    if (!marketChart) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+    
+    marketChart.options.scales.x.ticks.color = textColor;
+    marketChart.options.scales.y.ticks.color = textColor;
+    marketChart.options.scales.x.grid.color = gridColor;
+    marketChart.options.scales.y.grid.color = gridColor;
+    marketChart.update();
 }
 
 function hideResult() { resultDiv.classList.add('hidden'); }

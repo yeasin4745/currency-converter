@@ -309,6 +309,32 @@ body {
     line-height: 1.4;
 }
 
+.chart-section {
+    margin-top: 32px;
+    padding: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.chart-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.chart-container {
+    position: relative;
+    height: 200px;
+    width: 100%;
+}
+
 .loading {
     margin-top: 32px;
     text-align: center;
@@ -498,14 +524,12 @@ body {
         display: flex;
         justify-content: center;
         margin: 0;
-        padding: 0;
     }
     .header {
         padding: 32px 20px;
     }
 }
 
-/* Favorites Section Styles */
 .favorites-section {
     margin-top: 24px;
     padding-top: 24px;

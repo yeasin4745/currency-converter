@@ -1,6 +1,6 @@
-# 💱 Currency Converter
+# 💱 Currency Converter - Professional Edition
 
-A modern, real-time currency converter web application that provides instant currency conversion with live exchange rates.
+A modern, real-time currency converter web application that provides instant currency conversion with live exchange rates, market insights, and a premium user experience.
 
 ## 🌐 Live Demo
 
@@ -8,127 +8,66 @@ A modern, real-time currency converter web application that provides instant cur
 
 ## 📸 Preview
 
-A beautiful and responsive currency converter with gradient design, smooth animations, and real-time exchange rates.
+A beautiful and responsive currency converter with glassmorphism design, real-time data visualization, and seamless theme switching.
 
 ## ✨ Features
 
-- 🔄 **Real-Time Conversion** - Fetches live exchange rates from Exchange Rate API
-- 💰 **Multiple Currencies** - Supports 10+ major global currencies
-- 🔁 **Currency Swap** - Instantly swap between source and target currencies
-- ⚡ **Auto-Convert** - Automatically converts when currencies change
-- 📱 **Responsive Design** - Works seamlessly on all devices (mobile, tablet, desktop)
-- 🎨 **Modern UI** - Clean interface with gradient backgrounds and smooth animations
-- ⚠️ **Error Handling** - User-friendly error messages for API failures
-- 💾 **Smart Caching** - Reduces API calls by caching exchange rates
+- 🔄 **Real-Time Conversion** - Fetches live exchange rates from the Open Exchange Rates API.
+- 📊 **Market Insights** - Visual bar charts showing the base currency's value against major global currencies using Chart.js.
+- 🌓 **Dark/Light Mode** - Fully integrated theme switcher with persistent user preference.
+- 🔍 **Smart Search** - Filterable currency dropdowns to quickly find any of the 160+ supported currencies.
+- ⭐ **Favorites** - Save your most-used currency pairs for one-click access.
+- 📜 **Conversion History** - Keep track of your recent conversions with a detailed history log.
+- ✍️ **Amount in Words** - Automatically generates a textual representation of the converted amount.
+- 🔁 **Instant Swap** - Quickly reverse the source and target currencies.
+- 📱 **Fully Responsive** - Optimized for mobile, tablet, and desktop viewports.
+- 💾 **Smart Caching** - Minimizes API calls by caching rates for the current session.
 
 ## 🛠️ Technologies Used
 
-- **HTML5** - Semantic markup and structure
-- **CSS3** - Modern styling with gradients, animations, and flexbox
-- **JavaScript (ES6+)** - Async/await, fetch API, DOM manipulation
-- **Exchange Rate API** - Free currency exchange rate data
+- **HTML5** - Semantic markup for structure.
+- **CSS3** - Custom properties, flexbox/grid, and smooth transitions.
+- **JavaScript (ES6+)** - Vanilla JS with async/await and localStorage for persistence.
+- **Chart.js** - Dynamic data visualization for market rates.
+- **Font Awesome** - Professional iconography.
+- **Open Exchange Rates API** - Reliable currency exchange data.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- Internet connection for API calls
+- A modern web browser (Chrome, Firefox, Safari, Edge).
+- Internet connection for real-time API data.
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository:
    ```bash
    git clone https://github.com/yeasin4745/currency-converter.git
    ```
 
-2. Navigate to the project directory
+2. Navigate to the project directory:
    ```bash
    cd currency-converter
    ```
 
-3. Open `index.html` in your browser
-   ```bash
-   # Or simply double-click the index.html file
-   ```
+3. Open `index.html` in your browser.
 
 ## 📂 Project Structure
 
 ```
 currency-converter/
 │
-├── index.html          # Main HTML file
-├── style.css           # Stylesheet with all designs
-├── script.js           # JavaScript logic and API integration
+├── index.html          # Main application structure
+├── style.css           # Modern UI styling and theme variables
+├── script.js           # Core logic, API integration, and Chart.js setup
+├── auto-log.json       # Automated update tracking
 └── README.md           # Project documentation
 ```
 
-## 💻 How It Works
-
-1. **User Input** - Enter the amount to convert
-2. **Select Currencies** - Choose source and target currencies from dropdowns
-3. **API Call** - Fetches latest exchange rates from `https://open.er-api.com/v6/latest/`
-4. **Calculation** - Converts amount using the fetched exchange rate
-5. **Display Result** - Shows converted amount and exchange rate
-
-## 🌍 Supported Currencies
-
-- USD - US Dollar
-- EUR - Euro
-- GBP - British Pound
-- BDT - Bangladeshi Taka
-- INR - Indian Rupee
-- JPY - Japanese Yen
-- CNY - Chinese Yuan
-- AUD - Australian Dollar
-- CAD - Canadian Dollar
-- CHF - Swiss Franc
-
-## 🎯 Key Functionalities
-
-### Currency Conversion
-```javascript
-// Fetches real-time rates and converts amount
-async function convertCurrency() {
-    const rates = await fetchExchangeRates(baseCurrency);
-    const convertedAmount = amount * rates[targetCurrency];
-}
-```
-
-### Smart Caching
-```javascript
-// Caches rates to minimize API calls
-if (baseCurrency === lastBaseCurrency) {
-    return exchangeRates; // Use cached rates
-}
-```
-
-### Swap Feature
-```javascript
-// One-click currency swap
-function swapCurrencies() {
-    [fromCurrency.value, toCurrency.value] = 
-    [toCurrency.value, fromCurrency.value];
-}
-```
-
-## 🎨 Design Features
-
-- **Gradient Backgrounds** - Eye-catching purple gradient theme
-- **Smooth Animations** - Fade-in, slide-up, and rotation effects
-- **Loading States** - Spinner animation during API calls
-- **Hover Effects** - Interactive button and input hover states
-- **Mobile-First** - Fully responsive design
-
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to fork the project and submit a Pull Request.
 
 ## 📝 License
 
@@ -139,18 +78,6 @@ This project is open source and available under the [MIT License](LICENSE).
 **Yeasin**
 - GitHub: [@yeasin4745](https://github.com/yeasin4745)
 - Project Link: [Currency Converter](https://yeasin4745.github.io/currency-converter/)
-
-## 🙏 Acknowledgments
-
-- [Exchange Rate API](https://www.exchangerate-api.com/) - Free currency exchange rate data
-- Inspiration from modern web design trends
-- Built with passion for learning and innovation
-
-## 📞 Support
-
-If you have any questions or need help, feel free to:
-- Open an issue on GitHub
-- Contact via GitHub profile
 
 ---
 

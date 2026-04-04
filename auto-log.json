@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-04-03T10:00:00Z",
-  "changeSummary": "Added 'Amount in Words' feature to provide a clear textual representation of converted values. Improved result UI with better spacing and typography. Refactored result display logic for better readability."
+  "lastUpdate": "2026-04-04T12:00:00Z",
+  "changeSummary": "Integrated Chart.js to provide a visual 'Market Overview' bar chart. Added chart theme synchronization with dark/light modes. Improved README.md with comprehensive feature documentation and updated tech stack. Refined UI layout to accommodate the new data visualization section."
 }
