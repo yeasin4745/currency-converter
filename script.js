@@ -19,6 +19,8 @@ const favoritesList = document.getElementById('favoritesList');
 const fromSearch = document.getElementById('fromSearch');
 const toSearch = document.getElementById('toSearch');
 const chartSection = document.getElementById('chartSection');
+const copyBtn = document.getElementById('copyBtn');
+const rateTrend = document.getElementById('rateTrend');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
@@ -46,6 +48,7 @@ historyToggle.addEventListener('click', toggleHistory);
 clearHistoryBtn.addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
 favoriteBtn.addEventListener('click', toggleFavorite);
+copyBtn.addEventListener('click', copyToClipboard);
 fromSearch.addEventListener('input', (e) => filterCurrencies(e.target.value, fromCurrency));
 toSearch.addEventListener('input', (e) => filterCurrencies(e.target.value, toCurrency));
 
@@ -355,7 +358,46 @@ function showResult(originalAmount, convertedAmount, rate, from, to) {
     }
     amountInWords.textContent = `(${words} ${CURRENCY_NAMES[to] || to})`;
     
+    updateTrendIndicator(rate);
     resultDiv.classList.remove('hidden');
+}
+
+function updateTrendIndicator(currentRate) {
+    const from = fromCurrency.value;
+    const to = toCurrency.value;
+    const pair = `${from}-${to}`;
+    const previousRateKey = `prevRate_${pair}`;
+    const previousRate = parseFloat(localStorage.getItem(previousRateKey));
+    
+    rateTrend.classList.remove('hidden', 'trend-up', 'trend-down', 'trend-neutral');
+    
+    if (previousRate && previousRate !== currentRate) {
+        const diff = ((currentRate - previousRate) / previousRate) * 100;
+        const isUp = diff > 0;
+        
+        rateTrend.classList.add(isUp ? 'trend-up' : 'trend-down');
+        rateTrend.innerHTML = `
+            <i class="fas fa-caret-${isUp ? 'up' : 'down'}"></i>
+            ${Math.abs(diff).toFixed(2)}%
+        `;
+    } else {
+        rateTrend.classList.add('trend-neutral');
+        rateTrend.innerHTML = `<i class="fas fa-minus"></i> 0.00%`;
+    }
+    
+    localStorage.setItem(previousRateKey, currentRate);
+}
+
+function copyToClipboard() {
+    const text = `${amountInput.value} ${fromCurrency.value} = ${resultAmount.textContent} (Rate: ${exchangeRate.textContent})`;
+    navigator.clipboard.writeText(text).then(() => {
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyBtn.innerHTML = '<i class="far fa-copy"></i>';
+        }, 2000);
+    });
 }
 
 function updateMarketChart(rates, base, target) {

@@ -607,3 +607,72 @@ body {
     color: var(--error);
     background: rgba(239, 68, 68, 0.1);
 }
+
+/* New Feature Styles */
+.result-amount-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.copy-btn {
+    background: rgba(79, 70, 229, 0.1);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    color: var(--primary-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.copy-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.copy-btn.copied {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.exchange-rate-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.rate-trend {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trend-up {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.trend-down {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
+
+.trend-neutral {
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--text-secondary);
+}

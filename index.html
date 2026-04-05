@@ -70,8 +70,16 @@
 
                 <div id="result" class="result hidden">
                     <div class="result-header">Converted Amount</div>
-                    <div class="result-amount" id="resultAmount"></div>
-                    <div class="exchange-rate" id="exchangeRate"></div>
+                    <div class="result-amount-wrapper">
+                        <div class="result-amount" id="resultAmount"></div>
+                        <button id="copyBtn" class="copy-btn" title="Copy result to clipboard">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="exchange-rate-row">
+                        <div class="exchange-rate" id="exchangeRate"></div>
+                        <div id="rateTrend" class="rate-trend hidden"></div>
+                    </div>
                     <div id="amountInWords" class="amount-in-words"></div>
                 </div>
 
