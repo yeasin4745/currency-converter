@@ -676,3 +676,25 @@ body {
     background: rgba(100, 116, 139, 0.1);
     color: var(--text-secondary);
 }
+
+.offline-warning {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+    color: #f57c00;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

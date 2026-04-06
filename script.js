@@ -279,12 +279,45 @@ async function convertCurrency() {
 
 async function fetchExchangeRates(baseCurrency) {
     if (baseCurrency === lastBaseCurrency && Object.keys(exchangeRates).length > 0) return exchangeRates;
-    const response = await fetch(`${API_URL}${baseCurrency}`);
-    if (!response.ok) throw new Error();
-    const data = await response.json();
-    exchangeRates = data.rates;
-    lastBaseCurrency = baseCurrency;
-    return exchangeRates;
+    
+    try {
+        const response = await fetch(`${API_URL}${baseCurrency}`);
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        exchangeRates = data.rates;
+        lastBaseCurrency = baseCurrency;
+        
+        localStorage.setItem(`cache_${baseCurrency}`, JSON.stringify({
+            rates: exchangeRates,
+            timestamp: new Date().getTime()
+        }));
+        
+        return exchangeRates;
+    } catch (error) {
+        const cached = localStorage.getItem(`cache_${baseCurrency}`);
+        if (cached) {
+            const { rates, timestamp } = JSON.parse(cached);
+            const age = Math.round((new Date().getTime() - timestamp) / 1000 / 60);
+            console.log(`Using cached rates for ${baseCurrency} (${age} mins old)`);
+            exchangeRates = rates;
+            lastBaseCurrency = baseCurrency;
+            showOfflineWarning(age);
+            return exchangeRates;
+        }
+        throw error;
+    }
+}
+
+function showOfflineWarning(ageInMinutes) {
+    const warning = document.createElement('div');
+    warning.className = 'offline-warning';
+    warning.innerHTML = `<i class="fas fa-wifi-slash"></i> Offline Mode: Using rates from ${ageInMinutes} mins ago`;
+    
+    const existingWarning = document.querySelector('.offline-warning');
+    if (existingWarning) existingWarning.remove();
+    
+    document.querySelector('.converter-body').prepend(warning);
+    setTimeout(() => warning.remove(), 5000);
 }
 
 function swapCurrencies() {
