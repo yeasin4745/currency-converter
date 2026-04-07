@@ -521,3 +521,11 @@ window.addEventListener('load', async () => {
     updateFavoriteBtnState();
     if (amountInput.value) convertCurrency();
 });
+
+window.quickConvert = function(from, to) {
+    amountInput.value = '1';
+    fromCurrency.value = from;
+    toCurrency.value = to;
+    updateFavoriteBtnState();
+    convertCurrency();
+};

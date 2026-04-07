@@ -698,3 +698,54 @@ body {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+.quick-convert-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--input-border);
+}
+
+.quick-convert-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+.quick-convert-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.quick-btn {
+    padding: 10px 12px;
+    background: var(--card-bg);
+    border: 2px solid var(--input-border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(79, 70, 229, 0.05);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.quick-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .quick-convert-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

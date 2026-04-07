@@ -68,6 +68,18 @@
                     <i class="fas fa-sync-alt"></i> Convert Now
                 </button>
 
+                <div class="quick-convert-section">
+                    <div class="quick-convert-label">Quick Convert</div>
+                    <div class="quick-convert-buttons">
+                        <button class="quick-btn" onclick="quickConvert('USD', 'EUR')">USD → EUR</button>
+                        <button class="quick-btn" onclick="quickConvert('EUR', 'GBP')">EUR → GBP</button>
+                        <button class="quick-btn" onclick="quickConvert('USD', 'INR')">USD → INR</button>
+                        <button class="quick-btn" onclick="quickConvert('USD', 'JPY')">USD → JPY</button>
+                        <button class="quick-btn" onclick="quickConvert('GBP', 'USD')">GBP → USD</button>
+                        <button class="quick-btn" onclick="quickConvert('USD', 'AUD')">USD → AUD</button>
+                    </div>
+                </div>
+
                 <div id="result" class="result hidden">
                     <div class="result-header">Converted Amount</div>
                     <div class="result-amount-wrapper">
