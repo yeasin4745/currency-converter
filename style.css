@@ -744,6 +744,35 @@ body {
     transform: translateY(0);
 }
 
+.reverse-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: rgba(79, 70, 229, 0.1);
+    border: 2px solid rgba(79, 70, 229, 0.3);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.reverse-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.reverse-btn:active {
+    transform: translateY(0);
+}
+
 @media (max-width: 480px) {
     .quick-convert-buttons {
         grid-template-columns: repeat(2, 1fr);

@@ -21,6 +21,7 @@ const toSearch = document.getElementById('toSearch');
 const chartSection = document.getElementById('chartSection');
 const copyBtn = document.getElementById('copyBtn');
 const rateTrend = document.getElementById('rateTrend');
+const reverseBtn = document.getElementById('reverseBtn');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
@@ -49,6 +50,7 @@ clearHistoryBtn.addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
 favoriteBtn.addEventListener('click', toggleFavorite);
 copyBtn.addEventListener('click', copyToClipboard);
+reverseBtn.addEventListener('click', reverseConversion);
 fromSearch.addEventListener('input', (e) => filterCurrencies(e.target.value, fromCurrency));
 toSearch.addEventListener('input', (e) => filterCurrencies(e.target.value, toCurrency));
 
@@ -511,6 +513,16 @@ function showError(message) {
     errorDiv.classList.remove('hidden');
 }
 function hideError() { errorDiv.classList.add('hidden'); }
+
+window.reverseConversion = function() {
+    const temp = amountInput.value;
+    amountInput.value = resultAmount.textContent.split(' ')[0];
+    const tempCurrency = fromCurrency.value;
+    fromCurrency.value = toCurrency.value;
+    toCurrency.value = tempCurrency;
+    updateFavoriteBtnState();
+    convertCurrency();
+};
 
 window.addEventListener('load', async () => {
     loadTheme();

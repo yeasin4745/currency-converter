@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-04-07T10:00:00Z",
-  "changeSummary": "Introduced 'Quick Convert' feature, allowing users to instantly convert between popular currency pairs (USD, EUR, GBP, INR, JPY, AUD) with a single click. Added a dedicated Quick Convert UI section with responsive grid buttons and enhanced hover effects for better accessibility and speed."
+  "lastUpdate": "2026-04-08T10:30:00Z",
+  "changeSummary": "Added a 'Reverse Conversion' feature that allows users to instantly swap the result back to the original currency with a single click, improving UX for round-trip calculations."
 }
