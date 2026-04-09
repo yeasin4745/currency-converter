@@ -778,3 +778,65 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.comparison-section {
+    margin-top: 32px;
+    padding: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+}
+
+.comparison-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--input-border);
+}
+
+.comparison-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.comparison-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(79, 70, 229, 0.03);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.comparison-row:hover {
+    background: rgba(79, 70, 229, 0.08);
+    border-color: var(--primary-color);
+}
+
+.comparison-currency {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+@media (max-width: 480px) {
+    .comparison-row {
+        grid-template-columns: 1fr;
+    }
+}

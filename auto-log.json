@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-04-08T10:30:00Z",
-  "changeSummary": "Added a 'Reverse Conversion' feature that allows users to instantly swap the result back to the original currency with a single click, improving UX for round-trip calculations."
+  "lastUpdate": "2026-04-09T10:00:00Z",
+  "changeSummary": "Added a 'Multi-Currency Comparison' feature that allows users to compare the conversion of their entered amount against a list of major global currencies simultaneously, providing a comprehensive market overview."
 }

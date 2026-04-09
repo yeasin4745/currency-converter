@@ -22,12 +22,15 @@ const chartSection = document.getElementById('chartSection');
 const copyBtn = document.getElementById('copyBtn');
 const rateTrend = document.getElementById('rateTrend');
 const reverseBtn = document.getElementById('reverseBtn');
+const comparisonSection = document.getElementById('comparisonSection');
+const comparisonTable = document.getElementById('comparisonTable');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
 const THEME_KEY = 'currencyConverterTheme';
 const FAVORITES_KEY = 'currencyConverterFavorites';
 const MAX_HISTORY = 5;
+const COMPARISON_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'AUD', 'CAD', 'BDT', 'INR', 'CHF', 'SGD', 'NZD'];
 
 let exchangeRates = {};
 let lastBaseCurrency = '';
@@ -272,6 +275,7 @@ async function convertCurrency() {
         showResult(amount, convertedAmount, rate, from, to);
         addToHistory(amount, from, to, convertedAmount, rate);
         updateMarketChart(rates, from, to);
+        updateComparisonTable(amount, from, rates);
         hideLoading();
     } catch (error) {
         hideLoading();
@@ -523,6 +527,27 @@ window.reverseConversion = function() {
     updateFavoriteBtnState();
     convertCurrency();
 };
+
+function updateComparisonTable(amount, baseCurrency, rates) {
+    const availableCurrencies = COMPARISON_CURRENCIES.filter(c => rates[c] !== undefined && c !== baseCurrency);
+    
+    if (availableCurrencies.length === 0) {
+        comparisonSection.classList.add('hidden');
+        return;
+    }
+    
+    comparisonTable.innerHTML = availableCurrencies.map(currency => {
+        const convertedValue = (amount * rates[currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        return `
+            <div class="comparison-row">
+                <div class="comparison-currency">${currency}</div>
+                <div class="comparison-value">${convertedValue}</div>
+            </div>
+        `;
+    }).join('');
+    
+    comparisonSection.classList.remove('hidden');
+}
 
 window.addEventListener('load', async () => {
     loadTheme();
