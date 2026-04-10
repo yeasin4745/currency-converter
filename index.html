@@ -64,9 +64,14 @@
                     </div>
                 </div>
 
-                <button id="convertBtn" class="convert-btn">
-                    <i class="fas fa-sync-alt"></i> Convert Now
-                </button>
+                <div class="action-buttons">
+                    <button id="convertBtn" class="convert-btn">
+                        <i class="fas fa-sync-alt"></i> Convert Now
+                    </button>
+                    <button id="resetBtn" class="reset-btn" title="Reset all fields">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
 
                 <div class="quick-convert-section">
                     <div class="quick-convert-label">Quick Convert</div>
@@ -118,6 +123,8 @@
                     <div class="spinner"></div>
                     <p>Fetching latest market rates...</p>
                 </div>
+
+                <div id="lastUpdated" class="last-updated hidden"></div>
 
                 <div id="error" class="error hidden"></div>
 

@@ -24,6 +24,8 @@ const rateTrend = document.getElementById('rateTrend');
 const reverseBtn = document.getElementById('reverseBtn');
 const comparisonSection = document.getElementById('comparisonSection');
 const comparisonTable = document.getElementById('comparisonTable');
+const resetBtn = document.getElementById('resetBtn');
+const lastUpdatedDiv = document.getElementById('lastUpdated');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
@@ -48,6 +50,7 @@ const CURRENCY_NAMES = {
 
 convertBtn.addEventListener('click', convertCurrency);
 swapBtn.addEventListener('click', swapCurrencies);
+resetBtn.addEventListener('click', resetFields);
 historyToggle.addEventListener('click', toggleHistory);
 clearHistoryBtn.addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
@@ -276,6 +279,7 @@ async function convertCurrency() {
         addToHistory(amount, from, to, convertedAmount, rate);
         updateMarketChart(rates, from, to);
         updateComparisonTable(amount, from, rates);
+        updateLastUpdated();
         hideLoading();
     } catch (error) {
         hideLoading();
@@ -527,6 +531,28 @@ window.reverseConversion = function() {
     updateFavoriteBtnState();
     convertCurrency();
 };
+
+function updateLastUpdated() {
+    const now = new Date();
+    lastUpdatedDiv.innerHTML = `<i class="far fa-clock"></i> Rates as of: ${now.toLocaleTimeString()} on ${now.toLocaleDateString()}`;
+    lastUpdatedDiv.classList.remove('hidden');
+}
+
+function resetFields() {
+    amountInput.value = '1';
+    fromCurrency.value = 'USD';
+    toCurrency.value = 'BDT';
+    fromSearch.value = '';
+    toSearch.value = '';
+    renderOptions(fromCurrency, 'USD');
+    renderOptions(toCurrency, 'BDT');
+    hideResult();
+    hideError();
+    lastUpdatedDiv.classList.add('hidden');
+    chartSection.classList.add('hidden');
+    comparisonSection.classList.add('hidden');
+    updateFavoriteBtnState();
+}
 
 function updateComparisonTable(amount, baseCurrency, rates) {
     const availableCurrencies = COMPARISON_CURRENCIES.filter(c => rates[c] !== undefined && c !== baseCurrency);

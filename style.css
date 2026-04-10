@@ -840,3 +840,47 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.reset-btn {
+    flex: 0 0 100px;
+    padding: 16px;
+    background: var(--input-border);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.reset-btn:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .reset-btn:hover {
+    background: #334155;
+}
+
+.last-updated {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
