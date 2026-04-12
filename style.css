@@ -933,3 +933,52 @@ body {
         transform: translateX(0);
     }
 }
+
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #f59e0b;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.most-used-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--input-border);
+}
+
+.most-used-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.most-used-chip {
+    padding: 6px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.most-used-chip:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(79, 70, 229, 0.05);
+}

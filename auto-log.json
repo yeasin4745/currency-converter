@@ -1,4 +1,4 @@
 {
-  "lastUpdate": "2026-04-11T12:00:00Z",
-  "changeSummary": "Implemented a global toast notification system for better user feedback on actions like theme toggling, saving favorites, and clipboard copying. Refactored code to comply with clean code standards and removed all comments for a production-ready look."
+  "lastUpdate": "2026-04-12T10:00:00Z",
+  "changeSummary": "Implemented Offline Mode with rate caching and a Most Used Currencies tracker for improved UX and reliability."
 }

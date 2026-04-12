@@ -27,11 +27,16 @@ const comparisonTable = document.getElementById('comparisonTable');
 const resetBtn = document.getElementById('resetBtn');
 const lastUpdatedDiv = document.getElementById('lastUpdated');
 const notificationContainer = document.getElementById('notificationContainer');
+const offlineIndicator = document.getElementById('offlineIndicator');
+const mostUsedSection = document.getElementById('mostUsedSection');
+const mostUsedList = document.getElementById('mostUsedList');
 
 const API_URL = 'https://open.er-api.com/v6/latest/';
 const HISTORY_KEY = 'currencyConverterHistory';
 const THEME_KEY = 'currencyConverterTheme';
 const FAVORITES_KEY = 'currencyConverterFavorites';
+const RATES_CACHE_KEY = 'currencyConverterRatesCache';
+const USAGE_STATS_KEY = 'currencyConverterUsageStats';
 const MAX_HISTORY = 5;
 const COMPARISON_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'AUD', 'CAD', 'BDT', 'INR', 'CHF', 'SGD', 'NZD'];
 
@@ -40,6 +45,7 @@ let lastBaseCurrency = '';
 let conversionHistory = [];
 let favoritePairs = [];
 let marketChart = null;
+let usageStats = {};
 
 const CURRENCY_NAMES = {
     "USD": "US Dollar", "EUR": "Euro", "GBP": "British Pound", "BDT": "Bangladeshi Taka",
@@ -74,26 +80,28 @@ toCurrency.addEventListener('change', () => {
     convertCurrency();
 });
 
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+function updateOnlineStatus() {
+    if (navigator.onLine) {
+        offlineIndicator.classList.add('hidden');
+        showNotification('You are back online', 'success');
+    } else {
+        offlineIndicator.classList.remove('hidden');
+        showNotification('You are offline. Using cached data.', 'info');
+    }
+}
+
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
-    
-    let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    if (type === 'error') icon = 'exclamation-circle';
-    
-    notification.innerHTML = `
-        <i class="fas fa-${icon}"></i>
-        <span>${message}</span>
-    `;
-    
+    let icon = type === 'success' ? 'check-circle' : (type === 'error' ? 'exclamation-circle' : 'info-circle');
+    notification.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
     notificationContainer.appendChild(notification);
-    
     setTimeout(() => {
         notification.classList.add('fade-out');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
+        setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
@@ -127,7 +135,6 @@ function toggleFavorite() {
     const from = fromCurrency.value;
     const to = toCurrency.value;
     const pair = `${from}-${to}`;
-    
     const index = favoritePairs.indexOf(pair);
     if (index === -1) {
         favoritePairs.push(pair);
@@ -136,7 +143,6 @@ function toggleFavorite() {
         favoritePairs.splice(index, 1);
         showNotification(`Removed ${from}/${to} from favorites`, 'info');
     }
-    
     saveFavorites();
     renderFavorites();
     updateFavoriteBtnState();
@@ -147,16 +153,10 @@ function renderFavorites() {
         favoritesList.classList.add('hidden');
         return;
     }
-    
     favoritesList.classList.remove('hidden');
     favoritesList.innerHTML = favoritePairs.map(pair => {
         const [from, to] = pair.split('-');
-        return `
-            <div class="favorite-chip" onclick="useFavorite('${pair}')">
-                <span>${from} ⇄ ${to}</span>
-                <i class="fas fa-times remove-fav" onclick="event.stopPropagation(); removeFavorite('${pair}')"></i>
-            </div>
-        `;
+        return `<div class="favorite-chip" onclick="useFavorite('${pair}')"><span>${from} ⇄ ${to}</span><i class="fas fa-times remove-fav" onclick="event.stopPropagation(); removeFavorite('${pair}')"></i></div>`;
     }).join('');
 }
 
@@ -181,11 +181,8 @@ function updateFavoriteBtnState() {
     const to = toCurrency.value;
     const pair = `${from}-${to}`;
     const isActive = favoritePairs.includes(pair);
-    
     favoriteBtn.classList.toggle('active', isActive);
-    favoriteBtn.innerHTML = isActive ? 
-        '<i class="fas fa-star"></i> Favorited' : 
-        '<i class="far fa-star"></i> Save to Favorites';
+    favoriteBtn.innerHTML = isActive ? '<i class="fas fa-star"></i> Favorited' : '<i class="far fa-star"></i> Save to Favorites';
 }
 
 function loadHistoryFromStorage() {
@@ -198,12 +195,7 @@ function saveHistoryToStorage() {
 }
 
 function addToHistory(amount, from, to, result, rate) {
-    const historyItem = {
-        amount, from, to,
-        result: parseFloat(result.toFixed(2)),
-        rate: parseFloat(rate.toFixed(4)),
-        timestamp: new Date().toLocaleTimeString()
-    };
+    const historyItem = { amount, from, to, result: parseFloat(result.toFixed(2)), rate: parseFloat(rate.toFixed(4)), timestamp: new Date().toLocaleTimeString() };
     conversionHistory.unshift(historyItem);
     if (conversionHistory.length > MAX_HISTORY) conversionHistory.pop();
     saveHistoryToStorage();
@@ -222,9 +214,7 @@ function renderHistory() {
                 <span class="history-rate">1 ${item.from} = ${item.rate} ${item.to}</span>
                 <span class="history-time">${item.timestamp}</span>
             </div>
-            <button class="history-item-btn" onclick="useHistoryItem(${index})" title="Use this conversion">
-                <i class="fas fa-redo-alt"></i>
-            </button>
+            <button class="history-item-btn" onclick="useHistoryItem(${index})" title="Use this conversion"><i class="fas fa-redo-alt"></i></button>
         </div>
     `).join('');
 }
@@ -255,10 +245,21 @@ let allCurrencies = [];
 
 async function populateCurrencies() {
     try {
-        const response = await fetch(`${API_URL}USD`);
-        const data = await response.json();
+        let data;
+        if (navigator.onLine) {
+            const response = await fetch(`${API_URL}USD`);
+            data = await response.json();
+            localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({timestamp: new Date().getTime(), rates: data.rates}));
+        } else {
+            const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY));
+            if (cached) {
+                data = {rates: cached.rates};
+                updateOnlineStatus();
+            } else {
+                throw new Error('No internet and no cached data');
+            }
+        }
         allCurrencies = Object.keys(data.rates);
-        
         renderOptions(fromCurrency, 'USD');
         renderOptions(toCurrency, 'BDT');
     } catch (error) {
@@ -268,17 +269,13 @@ async function populateCurrencies() {
 
 function renderOptions(selectElement, selectedValue, filter = '') {
     const currentSelection = selectElement.value || selectedValue;
-    
     const filtered = allCurrencies.filter(curr => {
         const name = (CURRENCY_NAMES[curr] || '').toLowerCase();
         const code = curr.toLowerCase();
         const search = filter.toLowerCase();
-        return code.includes(search) || name.includes(search) || curr === currentSelection;
+        return code.includes(search) || name.includes(search);
     });
-
-    selectElement.innerHTML = filtered.map(curr => 
-        `<option value="${curr}" ${curr === currentSelection ? 'selected' : ''}>${curr} - ${CURRENCY_NAMES[curr] || 'Currency'}</option>`
-    ).join('');
+    selectElement.innerHTML = filtered.map(curr => `<option value="${curr}" ${curr === currentSelection ? 'selected' : ''}>${curr} - ${CURRENCY_NAMES[curr] || 'Currency'}</option>`).join('');
 }
 
 function filterCurrencies(query, selectElement) {
@@ -286,77 +283,121 @@ function filterCurrencies(query, selectElement) {
 }
 
 async function convertCurrency() {
-    const amount = parseFloat(amountInput.value);
+    const amount = amountInput.value;
     const from = fromCurrency.value;
     const to = toCurrency.value;
+    if (!amount || amount <= 0) return;
+    showLoading();
+    hideError();
+    try {
+        let rates;
+        if (navigator.onLine) {
+            if (lastBaseCurrency !== from) {
+                const response = await fetch(`${API_URL}${from}`);
+                const data = await response.json();
+                exchangeRates = data.rates;
+                lastBaseCurrency = from;
+                localStorage.setItem(`${RATES_CACHE_KEY}_${from}`, JSON.stringify({timestamp: new Date().getTime(), rates: exchangeRates}));
+            } else {
+                rates = exchangeRates;
+            }
+        } else {
+            const cached = JSON.parse(localStorage.getItem(`${RATES_CACHE_KEY}_${from}`));
+            if (cached) {
+                exchangeRates = cached.rates;
+                lastBaseCurrency = from;
+            } else {
+                throw new Error('Currency data not available offline');
+            }
+        }
+        const rate = exchangeRates[to];
+        const convertedAmount = amount * rate;
+        displayResult(amount, from, to, convertedAmount, rate);
+        addToHistory(parseFloat(amount), from, to, convertedAmount, rate);
+        updateMarketChart(from, exchangeRates);
+        updateComparisonTable(amount, from, exchangeRates);
+        updateLastUpdated();
+        trackUsage(from);
+        trackUsage(to);
+    } catch (error) {
+        showError(error.message || 'Something went wrong. Please try again.');
+    } finally {
+        hideLoading();
+    }
+}
 
-    if (isNaN(amount) || amount <= 0) {
-        showError('Please enter a valid amount');
+function trackUsage(currency) {
+    usageStats[currency] = (usageStats[currency] || 0) + 1;
+    localStorage.setItem(USAGE_STATS_KEY, JSON.stringify(usageStats));
+    renderMostUsed();
+}
+
+function renderMostUsed() {
+    const sorted = Object.entries(usageStats).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (sorted.length === 0) {
+        mostUsedSection.classList.add('hidden');
         return;
     }
-
-    try {
-        showLoading();
-        hideError();
-        hideResult();
-
-        const rates = await fetchExchangeRates(from);
-        const rate = rates[to];
-        const convertedAmount = amount * rate;
-
-        showResult(amount, convertedAmount, rate, from, to);
-        addToHistory(amount, from, to, convertedAmount, rate);
-        updateMarketChart(rates, from);
-        updateComparisonTable(amount, from, rates);
-        updateLastUpdated();
-        hideLoading();
-    } catch (error) {
-        hideLoading();
-        showError('Error converting currency. Please try again.');
-        showNotification('Conversion failed', 'error');
-    }
+    mostUsedSection.classList.remove('hidden');
+    mostUsedList.innerHTML = sorted.map(([curr]) => `<div class="most-used-chip" onclick="setCurrency('${curr}')">${curr}</div>`).join('');
 }
 
-async function fetchExchangeRates(base) {
-    if (lastBaseCurrency === base && Object.keys(exchangeRates).length > 0) {
-        return exchangeRates;
+window.setCurrency = function(curr) {
+    if (fromCurrency.value !== curr) {
+        toCurrency.value = curr;
+    } else {
+        fromCurrency.value = curr === 'USD' ? 'EUR' : 'USD';
     }
+    convertCurrency();
+};
 
-    const response = await fetch(`${API_URL}${base}`);
-    const data = await response.json();
-    exchangeRates = data.rates;
-    lastBaseCurrency = base;
-    return exchangeRates;
-}
-
-function showResult(amount, result, rate, from, to) {
-    resultAmount.textContent = `${result.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${to}`;
+function displayResult(amount, from, to, result, rate) {
+    resultAmount.textContent = `${parseFloat(amount).toLocaleString()} ${from} = ${result.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${to}`;
     exchangeRate.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
     amountInWords.textContent = numberToWords(result) + ` ${to}`;
     resultDiv.classList.remove('hidden');
-    
-    const trend = Math.random() > 0.5 ? 'up' : 'down';
-    const percent = (Math.random() * 2).toFixed(2);
-    rateTrend.className = `rate-trend trend-${trend}`;
-    rateTrend.innerHTML = `<i class="fas fa-caret-${trend === 'up' ? 'up' : 'down'}"></i> ${percent}%`;
-    rateTrend.classList.remove('hidden');
 }
+
+function numberToWords(num) {
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    if (num === 0) return 'Zero';
+    function convert(n) {
+        let s = '';
+        if (n >= 100) { s += ones[Math.floor(n / 100)] + ' Hundred '; n %= 100; }
+        if (n >= 20) { s += tens[Math.floor(n / 10)] + ' '; n %= 10; }
+        else if (n >= 10) { s += teens[n - 10] + ' '; n = 0; }
+        if (n > 0) { s += ones[n] + ' '; }
+        return s;
+    }
+    let integerPart = Math.floor(num);
+    let decimalPart = Math.round((num - integerPart) * 100);
+    let res = '';
+    if (integerPart >= 1000000) { res += convert(Math.floor(integerPart / 1000000)) + 'Million '; integerPart %= 1000000; }
+    if (integerPart >= 1000) { res += convert(Math.floor(integerPart / 1000)) + 'Thousand '; integerPart %= 1000; }
+    res += convert(integerPart);
+    if (decimalPart > 0) { res += 'and ' + convert(decimalPart) + 'Cents'; }
+    return res.trim();
+}
+
+function showLoading() { loadingDiv.classList.remove('hidden'); }
+function hideLoading() { loadingDiv.classList.add('hidden'); }
+function showError(msg) { errorDiv.textContent = msg; errorDiv.classList.remove('hidden'); }
+function hideError() { errorDiv.classList.add('hidden'); }
+function hideResult() { resultDiv.classList.add('hidden'); }
 
 function swapCurrencies() {
     const temp = fromCurrency.value;
     fromCurrency.value = toCurrency.value;
     toCurrency.value = temp;
-    
     const tempSearch = fromSearch.value;
     fromSearch.value = toSearch.value;
     toSearch.value = tempSearch;
-    
     renderOptions(fromCurrency, fromCurrency.value);
     renderOptions(toCurrency, toCurrency.value);
-    
     updateFavoriteBtnState();
     convertCurrency();
-    showNotification('Currencies swapped', 'success');
 }
 
 function copyToClipboard() {
@@ -364,7 +405,7 @@ function copyToClipboard() {
     navigator.clipboard.writeText(text).then(() => {
         copyBtn.classList.add('copied');
         copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-        showNotification('Copied to clipboard!', 'success');
+        showNotification('Result copied to clipboard', 'success');
         setTimeout(() => {
             copyBtn.classList.remove('copied');
             copyBtn.innerHTML = '<i class="far fa-copy"></i>';
@@ -372,137 +413,10 @@ function copyToClipboard() {
     });
 }
 
-function numberToWords(n) {
-    const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    const scales = ['', 'Thousand', 'Million', 'Billion'];
-
-    if (n === 0) return 'Zero';
-    
-    let num = Math.floor(n);
-    let words = '';
-    let scaleIndex = 0;
-
-    while (num > 0) {
-        let chunk = num % 1000;
-        if (chunk > 0) {
-            let chunkWords = '';
-            if (chunk >= 100) {
-                chunkWords += units[Math.floor(chunk / 100)] + ' Hundred ';
-                chunk %= 100;
-            }
-            if (chunk >= 20) {
-                chunkWords += tens[Math.floor(chunk / 10)] + ' ';
-                chunk %= 10;
-            }
-            if (chunk > 0) {
-                chunkWords += units[chunk] + ' ';
-            }
-            words = chunkWords + scales[scaleIndex] + ' ' + words;
-        }
-        num = Math.floor(num / 1000);
-        scaleIndex++;
-    }
-    return words.trim();
-}
-
-function updateMarketChart(rates, baseCurrency) {
-    const ctx = document.getElementById('marketChart').getContext('2d');
-    const labels = COMPARISON_CURRENCIES.filter(c => c !== baseCurrency);
-    const data = labels.map(c => rates[c]);
-
-    chartSection.classList.remove('hidden');
-
-    if (marketChart) {
-        marketChart.data.labels = labels;
-        marketChart.data.datasets[0].data = data;
-        marketChart.data.datasets[0].label = `Relative Value (1 ${baseCurrency})`;
-        marketChart.update();
-        return;
-    }
-
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textColor = isDark ? '#94a3b8' : '#64748b';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-
-    marketChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: `Relative Value (1 ${baseCurrency})`,
-                data: data,
-                borderColor: '#4f46e5',
-                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointBackgroundColor: '#4f46e5',
-                pointBorderColor: '#fff',
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: isDark ? '#1e293b' : '#fff',
-                    titleColor: isDark ? '#f8fafc' : '#1e293b',
-                    bodyColor: isDark ? '#f8fafc' : '#1e293b',
-                    borderColor: '#4f46e5',
-                    borderWidth: 1
-                }
-            },
-            scales: {
-                x: {
-                    grid: { color: gridColor },
-                    ticks: { color: textColor }
-                },
-                y: {
-                    grid: { color: gridColor },
-                    ticks: { color: textColor }
-                }
-            }
-        }
-    });
-}
-
-function updateChartTheme() {
-    if (!marketChart) return;
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textColor = isDark ? '#94a3b8' : '#64748b';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-    
-    marketChart.options.scales.x.ticks.color = textColor;
-    marketChart.options.scales.y.ticks.color = textColor;
-    marketChart.options.scales.x.grid.color = gridColor;
-    marketChart.options.scales.y.grid.color = gridColor;
-    marketChart.update();
-}
-
-function hideResult() { resultDiv.classList.add('hidden'); }
-function showLoading() { loadingDiv.classList.remove('hidden'); }
-function hideLoading() { loadingDiv.classList.add('hidden'); }
-function showError(message) {
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-}
-function hideError() { errorDiv.classList.add('hidden'); }
-
-window.reverseConversion = function() {
-    const temp = amountInput.value;
-    amountInput.value = resultAmount.textContent.split(' ')[0].replace(/,/g, '');
-    const tempCurrency = fromCurrency.value;
-    fromCurrency.value = toCurrency.value;
-    toCurrency.value = tempCurrency;
-    updateFavoriteBtnState();
-    convertCurrency();
+function reverseConversion() {
+    swapCurrencies();
     showNotification('Conversion reversed', 'success');
-};
+}
 
 function updateLastUpdated() {
     const now = new Date();
@@ -529,31 +443,64 @@ function resetFields() {
 
 function updateComparisonTable(amount, baseCurrency, rates) {
     const availableCurrencies = COMPARISON_CURRENCIES.filter(c => rates[c] !== undefined && c !== baseCurrency);
-    
     if (availableCurrencies.length === 0) {
         comparisonSection.classList.add('hidden');
         return;
     }
-    
     comparisonTable.innerHTML = availableCurrencies.map(currency => {
         const convertedValue = (amount * rates[currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        return `
-            <div class="comparison-row">
-                <div class="comparison-currency">${currency}</div>
-                <div class="comparison-value">${convertedValue}</div>
-            </div>
-        `;
+        return `<div class="comparison-row"><div class="comparison-currency">${currency}</div><div class="comparison-value">${convertedValue}</div></div>`;
     }).join('');
-    
     comparisonSection.classList.remove('hidden');
+}
+
+function updateMarketChart(base, rates) {
+    const ctx = document.getElementById('marketChart').getContext('2d');
+    const data = COMPARISON_CURRENCIES.filter(c => rates[c] !== undefined && c !== base).slice(0, 8);
+    const labels = data;
+    const values = data.map(c => rates[c]);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    if (marketChart) marketChart.destroy();
+    marketChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{ label: `1 ${base} to Others`, data: values, backgroundColor: 'rgba(79, 70, 229, 0.6)', borderColor: '#4f46e5', borderWidth: 1 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { ticks: { color: textColor }, grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
+                x: { ticks: { color: textColor }, grid: { display: false } }
+            }
+        }
+    });
+    chartSection.classList.remove('hidden');
+}
+
+function updateChartTheme() {
+    if (marketChart) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        marketChart.options.scales.y.ticks.color = textColor;
+        marketChart.options.scales.x.ticks.color = textColor;
+        marketChart.options.scales.y.grid.color = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+        marketChart.update();
+    }
 }
 
 window.addEventListener('load', async () => {
     loadTheme();
     loadFavorites();
     loadHistoryFromStorage();
+    const storedStats = localStorage.getItem(USAGE_STATS_KEY);
+    if (storedStats) usageStats = JSON.parse(storedStats);
     await populateCurrencies();
     renderHistory();
+    renderMostUsed();
     updateFavoriteBtnState();
     if (amountInput.value) convertCurrency();
 });

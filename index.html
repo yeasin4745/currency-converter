@@ -10,6 +10,9 @@
 </head>
 <body>
     <div id="notificationContainer" class="notification-container"></div>
+    <div id="offlineIndicator" class="offline-indicator hidden">
+        <i class="fas fa-wifi-slash"></i> You are currently offline. Using cached rates.
+    </div>
     <div class="container">
         <div class="converter-card">
             <div class="theme-switch-wrapper">
@@ -84,6 +87,11 @@
                         <button class="quick-btn" onclick="quickConvert('GBP', 'USD')">GBP → USD</button>
                         <button class="quick-btn" onclick="quickConvert('USD', 'AUD')">USD → AUD</button>
                     </div>
+                </div>
+
+                <div id="mostUsedSection" class="most-used-section hidden">
+                    <div class="quick-convert-label">Most Used Currencies</div>
+                    <div id="mostUsedList" class="most-used-list"></div>
                 </div>
 
                 <div id="result" class="result hidden">
